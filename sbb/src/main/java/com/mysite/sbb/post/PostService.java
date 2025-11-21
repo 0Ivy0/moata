@@ -32,4 +32,21 @@ public class PostService {
 
         postRepository.save(post);
     }
+    
+    public List<Post> searchPosts(String key) 
+    {
+        return postRepository.findByTitleContainingOrContentContainingOrderByIdDesc(key, key);
+    }
+
+    public void stopRecruit(Integer postId) 
+    {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
+
+        post.setOff(1);  // 모집 중단
+
+        postRepository.save(post);
+    }
+
 }

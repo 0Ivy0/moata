@@ -14,7 +14,8 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class CommunityController {
+public class CommunityController 
+{
 	
 	private final PostRepository postRepository;
 	private final PostService postService;
@@ -34,8 +35,24 @@ public class CommunityController {
 		Post post = postRepository.findById(id).orElseThrow(()->new RuntimeException("게시글을 찾을 수 없습니다. "));
 		model.addAttribute("post",post); //게시글 정보 전송
 		
+		String user = userService.getCurrentUserId();
+
+	    if (user == null) {
+	        return "redirect:/login?needLogin2";
+	    }
+		
+	    model.addAttribute("user",user);
     		return "community_detail";
     }
+	
+	@PostMapping("/community_off/{id}")
+	public String stopRecruit(@PathVariable Integer id) {
+
+	    postService.stopRecruit(id); // 서비스에서 처리
+
+	    return "redirect:/community_detail/" + id;
+	}
+
 	
 	@GetMapping("/community_write")
 	public String community_write(Model model) 
@@ -61,7 +78,17 @@ public class CommunityController {
 
 	    return "redirect:/community";
 	}
-
+	
+	@PostMapping("/community_search")
+	public String coummunity_search(@RequestParam("key") String key, Model model)
+	{
+		List<Post> postList=postService.searchPosts(key);
+		
+		model.addAttribute("postList",postList);
+		model.addAttribute("key",key);
+		
+		return "community";
+	}
 	
 	
 }

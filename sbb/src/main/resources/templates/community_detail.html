@@ -21,7 +21,7 @@
 		                <div class="mb-6">
 		                    <div class="flex items-center gap-2 mb-4">
 		                        
-		                        <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded" th:text="${post.category}"></span>
+		                        <span class="border text-xs px-2 py-1 rounded" th:text="${post.category}"></span>
 		                    </div>
 		                    
 		                    <!-- 제목 -->
@@ -42,11 +42,37 @@
 		                            <div class="flex items-center gap-3 text-sm text-gray-600">
 		                   
 		                                <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+		                                <span th:text="'조회수'+' ' + ${post.viewCnt}"></span>
 
 		                            </div>
 		                        </div>
 		                    </div>
-		                    <button class="px-4 py-2 border rounded-lg">채팅하기</button>
+		                
+			      			<div class="flex items-center gap-2">
+			      			
+			      			<form th:if="${post.user.userId == user and post.off==0}"
+								      th:action="@{'/community_off/' + ${post.id}}"
+								      method="post">
+								    <button class="px-4 py-2 bg-red-600 text-white rounded-lg">모집 중단하기</button>
+								</form>
+								
+								<form th:if="${post.off==1}">
+							        <div class="px-4 py-2 bg-gray-600 text-white rounded-lg">모집 중단됨</div>
+							    </form>
+
+							    <form th:if="${post.user.userId != user}">
+							        <button class="px-4 py-2 border rounded-lg">채팅하기</button>
+							    </form>
+
+							    
+							    
+							    <form th:if="${post.user.userId == user}">
+							        <button class="px-4 py-2 border rounded-lg">수정하기</button>
+							    </form>
+							
+							</div>
+
+		                    
 		                </div>
 
 		                <!-- Content -->
@@ -54,15 +80,19 @@
 		                    <p class="leading-relaxed" th:text="${post.content}"></p>
 		                    
 		                </div>
+		                
+		                <br>
 
 		                <!-- Actions -->
 		                <div class="flex items-center justify-between pt-6 border-t">
 		                    <div class="flex items-center gap-6 text-sm text-gray-600">
-		                        <span th:text="'조회수'+' ' + ${post.viewCnt}"></span>
-		                        <span>댓글 8</span>
+		                        
 		                    </div>
-		                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">❤️ 좋아요 24</button>
+		                    
+		                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg">❤️ 24</button>
 		                </div>
+		               
+								                
 		            </div>
 
 		            <!-- Comments -->
