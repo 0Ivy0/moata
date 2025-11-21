@@ -39,6 +39,9 @@ public class Post{
     @Column(length = 50)
     private LocalDateTime createdAt;
     
+    @Column()
+    private Integer Off=0;
+    
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();

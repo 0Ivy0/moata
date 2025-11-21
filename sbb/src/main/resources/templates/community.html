@@ -24,10 +24,10 @@
 		            </div>
 
 		            <!-- Search -->
-		            <div class="mb-6">
-		                <input id="searchInput" type="text" placeholder="게시글 검색..." 
+		            <form action="/community_search" method="post" class="mb-6">
+		                <input id="searchInput" name="key" type="text" th:value="${key}" placeholder="게시글 검색..." 
 		                       class="w-full px-4 py-3 border border-blue-200 rounded-lg pl-10">
-		            </div>
+		            </form>
 
 		            <!-- Category Tabs -->
 		            <div class="flex flex-wrap gap-2">
@@ -40,12 +40,19 @@
 
 		        <div class="grid lg:grid-cols-4 gap-8">
 		            <!-- Main Content -->
-		            <div class="lg:col-span-3 space-y-6">
+		        <div class="lg:col-span-3 space-y-6">
+
+				<div th:if="${#lists.isEmpty(postList)}" class="text-center text-gray-500 mb-4">
+			    검색 결과가 없습니다.
+			</div>
 
 			    <!-- DB에서 받아온 postList 반복 -->
 			    <div th:each="post : ${postList}">
 			        <a th:href="@{'/community_detail/' + ${post.id}}"> <!-- 포스트 아이디로 반환 -->
-			            <div class="bg-white border rounded-lg p-6 hover:shadow-xl transition cursor-pointer">
+			            <div class="bg-white border rounded-lg p-6 hover:shadow-xl transition cursor-pointer"
+            					 th:classappend="${post.off == 1} ? ' opacity-50' : ''">
+			            
+			            
 			                <div class="flex items-start gap-4">
 			                    <div class="w-12 h-12 bg-blue-500 rounded-full"></div>
 			
@@ -53,6 +60,9 @@
 			
 			                        <!-- 카테고리 + 날짜 -->
 			                        <div class="flex items-center gap-2 mb-2">
+			                   
+										<span class="text-blue-600">[[${post.user.userId}]]</span>
+											
 			                            <span class="border text-xs px-2 py-1 rounded"
 			                                  th:text="${post.category}">카테고리</span>
 			
@@ -70,6 +80,7 @@
 			                        <p class="text-gray-600 mb-3 line-clamp-2" 
 			                           th:text="${post.content}">내용 미리보기...</p>
 			
+									<br>
 			                        <div class="flex items-center justify-between">
 			                            <div class="flex items-center gap-4 text-sm text-gray-600">
 			                                <span>❤️ 0</span>
@@ -81,14 +92,15 @@
 			                    </div>
 			                </div>
 			            </div>
+			           
 			        </a>
-			    </div>
-			
 			</div>
-					            
+			<br>		            
 
-		            <!-- Sidebar -->
-		            <div class="space-y-6">
+			</div>
+		        
+		         <!-- Sidebar -->
+		        <div class="space-y-6">
 		                <div class="bg-white border rounded-lg p-4 shadow-lg">
 		                    <h3 class="font-semibold mb-4">커뮤니티 현황</h3>
 		                    <div class="space-y-3">
@@ -103,7 +115,6 @@
 		                    </div>
 		                </div>
 		            </div>
-		        </div>
 		    </div>
 
 		    <!-- JavaScript 추가 및 검색 기능 구현 -->
