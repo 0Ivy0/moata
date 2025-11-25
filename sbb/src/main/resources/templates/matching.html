@@ -4,6 +4,7 @@
     <p>
 		<head>
 		    <meta charset="UTF-8">
+			<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=40e93d960060fff7cf23e2b43dfcc0e2&libraries=services"></script>
 		    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 		    <title>Moata-매칭</title>
 		    <script src="https://cdn.tailwindcss.com"></script>
@@ -27,6 +28,12 @@
 		                    </svg>
 		                    택시 메이트 찾기
 		                </h2>
+
+						<p class="mb-4 text-sm text-gray-600 flex items-center">
+							<svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+							<span id="location-status-text">내 위치 상태: 위치를 찾는 중...</span>
+						</p>
+
 		                <form id="searchForm" class="space-y-6">
 		                    <div class="grid md:grid-cols-2 gap-4">
 		                        <div>
@@ -44,6 +51,7 @@
 		                        <label class="text-sm font-medium block mb-2">출발 시간</label>
 		                        <input id="departureTime" type="datetime-local" class="px-3 py-2 border rounded-lg pl-10">
 		                    </div>
+
 		                    <button type="submit" 
 		                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg rounded-lg">
 		                        택시 메이트 찾기
@@ -99,33 +107,138 @@
 		    <!-- JavaScript 추가 및 검색 기능 구현 -->
 		    <script src="/js/app.js"></script>
 		    <script>
-		        document.addEventListener('DOMContentLoaded', () => {
-		            const searchForm = document.getElementById('searchForm');
-		            const resultsDiv = document.getElementById('results');
-		            
-		            searchForm.addEventListener('submit', (e) => {
-		                e.preventDefault();
-		                
-		                const departure = document.getElementById('departure').value;
-		                const destination = document.getElementById('destination').value;
-		                const departureTime = document.getElementById('departureTime').value;
-		                
-		                if (!departure || !destination || !departureTime) 
-		                {
-		                    alert('모든 필드를 입력해주세요.');
-		                    return;
-		                }
 
-		                // 검색 실행
-		                TaxiShare.toast.show('매칭을 찾는 중...', 'info');
-		                
-		                // 결과 표시
-		                setTimeout(() => {
-		                    resultsDiv.classList.remove('hidden');
-		                    TaxiShare.toast.show('1명의 매칭 결과를 찾았습니다!', 'success');
-		                }, 1500);
-		            });
-		        });
+				let myCurrentLat = null;
+    			let myCurrentLon = null;
+
+				/**
+				 * 카카오 지도 API가 자동으로 로드된 후 현재 위치 정보를 가져오는 함수
+				 */
+				function getMyLocationWithKakao() {
+
+					const statusElement = document.getElementById('location-status-text');
+
+					if (!navigator.geolocation) {
+						TaxiShare.toast.show('이 브라우저는 Geolocation을 지원하지 않습니다.', 'error');
+						console.error("Geolocation API를 지원하지 않는 브라우저입니다.");
+						if (statusElement) {
+							statusElement.textContent = '내 위치 상태: Geolocation을 지원하지 않습니다.';
+						}
+						return;
+					}
+
+					TaxiShare.toast.show('현재 위치 정보를 가져오는 중...', 'info');
+
+					// HTML5의 geolocation API를 사용하여 위치 요청
+					navigator.geolocation.getCurrentPosition((position) => {
+						// 성공 콜백 함수 시작
+						const lat = position.coords.latitude; // 위도
+						const lon = position.coords.longitude; // 경도
+
+						myCurrentLat = lat;
+						myCurrentLon = lon;
+
+						const coordinatesText = `(${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+						if (statusElement) {
+							statusElement.textContent = `내 위치 상태: 위치 획득 ${coordinatesText}`;
+						}
+
+						console.log(`현재 위치: 위도 ${lat}, 경도 ${lon}`);
+						//TaxiShare.toast.show(`위치 좌표 획득 성공: Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`, 'success');
+						
+
+					}, (error) => {
+						// 실패 콜백 함수 시작
+						let errorMessage;
+						switch (error.code) {
+							case error.PERMISSION_DENIED:
+								errorMessage = "위치 정보 접근이 차단되었습니다. 브라우저 설정에서 허용해주세요.";
+								break;
+							case error.POSITION_UNAVAILABLE:
+								errorMessage = "위치 정보를 사용할 수 없습니다.";
+								break;
+							case error.TIMEOUT:
+								errorMessage = "위치 정보 요청 시간이 초과되었습니다.";
+								break;
+							default:
+								errorMessage = "위치 정보를 가져오는 데 실패했습니다.";
+						}
+						if (statusElement) {
+							statusElement.textContent = `내 위치 상태: 위치 획득 실패 (${errorMessage.split('.')[0]})`;
+						}
+						
+						TaxiShare.toast.show(`위치 획득 실패: ${errorMessage}`, 'error');
+						console.error("Geolocation Error:", error.message);
+					}, {
+						// 옵션 객체 시작
+						enableHighAccuracy: true,
+						timeout: 15000,
+						maximumAge: 0
+					}); 
+				} 
+					document.addEventListener('DOMContentLoaded', () => {
+						const searchForm = document.getElementById('searchForm');
+						const resultsDiv = document.getElementById('results');
+
+						setTimeout(getMyLocationWithKakao, 2000);
+						
+						searchForm.addEventListener('submit', (e) => {
+							e.preventDefault();
+							
+							const departure = document.getElementById('departure').value;
+							const destination = document.getElementById('destination').value;
+							const departureTime = document.getElementById('departureTime').value;
+							
+							if (!departure || !destination || !departureTime) 
+							{
+								alert('모든 필드를 입력해주세요.');
+								return;
+							}
+
+							if (!myCurrentLat || !myCurrentLon) {
+								TaxiShare.toast.show('현재 위치 좌표를 획득 중입니다. 잠시 후 다시 시도해주세요.', 'warning');
+								return;
+							}
+
+							// 검색 실행
+							TaxiShare.toast.show('매칭을 찾는 중...', 'info');
+							
+							fetch('/api/match', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									departure: departure,
+									destination: destination,
+									departureTime: departureTime,
+									// 나의 현재 좌표를 서버로 전송 
+									currentLat: myCurrentLat,
+									currentLon: myCurrentLon
+								})
+							})
+							.then(response => response.json())
+							.then(data => {
+								// 4. 서버로부터 받은 실제 매칭 결과를 화면에 표시하는 함수를 호출해야 합니다.
+								// 현재는 하드코딩된 결과를 숨기는 로직만 있습니다.
+								if (data.matches && data.matches.length > 0) {
+									// 실제 데이터로 매칭 결과 HTML을 동적으로 생성/업데이트해야 합니다.
+									resultsDiv.classList.remove('hidden');
+									TaxiShare.toast.show(`${data.matches.length}명의 매칭 결과를 찾았습니다!`, 'success');
+									// 여기서는 실제 데이터로 resultsDiv 내부 HTML을 업데이트하는 추가 코드가 필요합니다.
+								} else {
+									// 매칭 결과가 없을 경우 처리
+									resultsDiv.classList.add('hidden');
+									TaxiShare.toast.show('일치하는 매칭 상대를 찾지 못했습니다.', 'warning');
+								}
+							})
+							.catch(error => {
+								TaxiShare.toast.show('검색 중 오류가 발생했습니다.', 'error');
+								console.error('Fetch Error:', error);
+							});
+							
+						});
+					});
 		    </script>
 		</body>
     </p>
