@@ -10,6 +10,7 @@ import com.mysite.sbb.user.SiteUser;
 import com.mysite.sbb.user.UserService;
 import com.mysite.sbb.comment.CommentService;
 import com.mysite.sbb.comment.Comment;
+import com.mysite.sbb.recommendation.RecommendationService;
 
 import lombok.RequiredArgsConstructor;
 import java.util.List;
@@ -25,6 +26,7 @@ public class CommunityController
 	private final PostService postService;
 	private final UserService userService;
 	private final CommentService commentService;
+	private final RecommendationService recommendationService;
 	
 	@GetMapping("/community")
 	public String communityList(@RequestParam(value="category", required=false) String category,
@@ -33,32 +35,34 @@ public class CommunityController
 	    List<Post> postList;
 
 	    if (category == null || category.equals("전체")) {
-	        // 전체 게시글
-	        postList = postRepository.findAll(Sort.by(Sort.Direction.DESC,"id"));
+	        postList = postRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 	    } else {
-	        // 특정 카테고리만 필터링
 	        postList = postRepository.findByCategoryOrderByIdDesc(category);
 	    }
 
 	    model.addAttribute("postList", postList);
 
 	    // 댓글 개수 Map
-	    Map<Integer, Integer> commentCount=new HashMap<>();
-	    
-	    for(Post p:postList)
-	    {
-	    		int count=commentService.getCommentCount(p.getId());
-	    		commentCount.put(p.getId(),count);
+	    Map<Integer, Integer> commentCount = new HashMap<>();
+	    for (Post p : postList) {
+	        int count = commentService.getCommentCount(p.getId());
+	        commentCount.put(p.getId(), count);
 	    }
-	    
-	    // 유저 수, 게시글 수
+	    model.addAttribute("commentCount", commentCount);
+
+	    // ⭐ 추천 개수 Map 추가 (중요)
+	    Map<Integer, Integer> recommendCount = new HashMap<>();
+	    for (Post p : postList) {
+	        int r = recommendationService.count(p); // 추천 수 조회
+	        recommendCount.put(p.getId(), r);
+	    }
+	    model.addAttribute("recommendCount", recommendCount);
+
+	    // 기타 정보
 	    model.addAttribute("userCount", userService.getUserCount());
 	    model.addAttribute("postCount", postService.getPostCount());
-
-	    // 현재 카테고리 표시용
 	    model.addAttribute("currentCategory", category);
 	    model.addAttribute("selectedCategory", category);
-	    model.addAttribute("commentCount", commentCount);
 
 	    return "community";
 	}
@@ -82,6 +86,16 @@ public class CommunityController
 	    // 🔥 댓글 리스트 추가 (여기가 핵심)
 	    List<Comment> commentList = commentService.getComments(id);
 	    model.addAttribute("comments", commentList);
+	    
+	    SiteUser currentUser = userService.getCurrentUser(); // 유ㅓㅈ 전체 따로 또 받아오기,, 더티코드 ㅈㅅ ㅋㅋ;;
+	    
+	    boolean isRecommended = recommendationService.isRecommended(post, currentUser);
+	    int recommendCount = recommendationService.count(post);
+
+
+	    model.addAttribute("isRecommended", isRecommended);
+	    model.addAttribute("recommendCount", recommendCount);
+
 
 	    // 상세 페이지로 이동
 	    return "community_detail";
@@ -191,7 +205,23 @@ public class CommunityController
 	    return "redirect:/community?deleted";
 	}
 
-	
+	@PostMapping("/recommend/{id}")
+	public String recommend(@PathVariable Integer id) {
+
+	    String userId = userService.getCurrentUserId();
+
+	    if (userId == null) {
+	        return "redirect:/login?needLogin";
+	    }
+
+	    Post post = postService.getPost(id);
+	    SiteUser user = userService.getCurrentUser();
+
+	    recommendationService.recommend(post, user);
+
+	    return "redirect:/community_detail/" + id;
+	}
+
 	
 
 	
