@@ -36,15 +36,15 @@
 				<!-- Tabs -->
 				<div class="mb-6">
 				    <div class="flex gap-2 border-b">
-				        <button class="tab-btn px-4 py-2 border-b-2 border-blue-600 font-medium" data-tab="activity">최근 활동</button>
-				        <button class="tab-btn px-4 py-2 text-gray-600" data-tab="liked">좋아요한 글</button>
+				        <button class="tab-btn px-4 py-2 text-black" data-tab="activity">작성한 글</button>
+						<button class="tab-btn px-4 py-2 text-gray-600" data-tab="liked">좋아요한 글</button>
 				    </div>
 				</div>
 
 				<!-- Tab Content: 최근 활동 -->
 				<div id="tab-activity" class="tab-content">
 				    <div class="bg-white border rounded-lg shadow-lg p-6">
-				        <h2 class="text-xl font-semibold mb-6">최근 작성한 글</h2>
+				        <h2 class="text-xl font-semibold mb-6">작성한 글</h2>
 
 				        <!-- 게시글 없을 때 -->
 				        <div th:if="${#lists.isEmpty(myPosts)}" class="text-gray-600">
@@ -69,38 +69,48 @@
 				                    </div>
 				                </div>
 				            </a>
+				            <br>
 				        </div>
 
 				    </div>
 				</div>
 
 
-				<!-- Tab Content: 좋아요한 글 -->
 				<div id="tab-liked" class="tab-content hidden">
 				    <div class="bg-white border rounded-lg shadow-lg p-6">
-				        <h2 class="text-xl font-semibold mb-6">좋아요한 글 목록</h2>
-
+				        <h2 class="text-xl font-semibold mb-6">좋아요한 글</h2>
+				
 				        <!-- 좋아요한 글 없을 때 -->
 				        <div th:if="${#lists.isEmpty(likedPosts)}" class="text-gray-600">
 				            좋아요한 게시글이 없습니다.
 				        </div>
-
-				        <!-- 좋아요한 글 반복 -->
-						<div class="space-y-4" th:each="rec : ${likedPosts}">
-						    <a th:href="@{/community_detail/{id}(id=${rec.post.id})}"
-						       class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-pink-50 rounded-lg hover:bg-pink-100 transition">
-
-						        <div>
-						            <div class="font-medium" th:text="${rec.post.title}">게시글 제목</div>
-						            <div class="text-sm text-gray-600"
-						                 th:text="${#temporals.format(rec.post.createdAt, 'yyyy.MM.dd')}"></div>
-						        </div>
-						    </a>
-						</div>
-
-
+				
+				        <!-- 좋아요한 글 목록 (최근 활동 UI 복사) -->
+				        <div class="space-y-4" th:each="rec : ${likedPosts}">
+				            <a th:href="@{/community_detail/{id}(id=${rec.post.id})}"
+				               class="flex items-center justify-between p-4 
+				                      bg-gradient-to-r from-gray-50 to-blue-50 
+				                      rounded-lg hover:bg-blue-100 transition">
+				
+				                <div class="flex items-center gap-4">
+				                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+				                        ❤️
+				                    </div>
+				
+				                    <div>
+				                        <div class="font-medium" th:text="${rec.post.title}">게시글 제목</div>
+				                        <div class="text-sm text-gray-600"
+				                             th:text="${#temporals.format(rec.post.createdAt, 'yyyy.MM.dd')}">
+				                        </div>
+				                    </div>
+				                </div>
+				
+				            </a>
+				            <br>
+				        </div>
 				    </div>
 				</div>
+
 
 
 		    </div>
