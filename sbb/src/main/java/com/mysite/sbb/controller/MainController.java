@@ -13,10 +13,4 @@ public class MainController
     {
     		return "main";
     }
-   
-    @GetMapping("/chat")
-    public String chatyPage()
-    {
-    		return "chat";
-    }    
 }

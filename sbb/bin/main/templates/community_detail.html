@@ -55,11 +55,13 @@
 								<form th:if="${post.off==1}">
 							        <div class="px-4 py-2 bg-gray-600 text-white rounded-lg">모집 중단됨</div>
 							    </form>
+								
+								<a th:if="${post.user.userId != user}" 
+								   th:href="@{'/chat?target=' + ${post.user.userId}}">
+								    <button class="px-4 py-2 border rounded-lg">채팅하기</button>
+								</a>
 
-							    <form th:if="${post.user.userId != user}">
-							        <button class="px-4 py-2 border rounded-lg">채팅하기</button>
-							    </form>
-							    
+								
 							    <a th:if="${post.user.userId == user}"
 								   th:href="@{'/community_delete/' + ${post.id}}"
 								   class="px-4 py-2 border rounded-lg"

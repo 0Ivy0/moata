@@ -1,128 +1,144 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/layout}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      layout:decorate="~{layout/layout}">
 <th:block layout:fragment="content">
-    <p>
-		<head>
-		    <meta charset="UTF-8">
-		    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-		    <title>Moata-실시간 채팅</title>
-		    <script src="https://cdn.tailwindcss.com"></script>
-		    <link rel="stylesheet" href="styles.css">
-		</head>
-		<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-		    <!-- Background decorations -->
-		    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-		        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
-		        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
-		    </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Moata - 실시간 채팅</title>
 
-		    <div class="relative z-10 container mx-auto px-4 py-8">
-		        <div class="mb-6">
-		            <h1 class="text-3xl font-bold text-gray-900">실시간 채팅</h1>
-		            <p class="text-gray-600 mt-1">매칭된 택시 메이트들과 소통하세요</p>
-		        </div>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-		        <div class="grid lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-		            <!-- Chat Rooms List -->
-		            <div class="backdrop-blur-sm bg-white/80 border rounded-lg shadow-xl">
-		                <div class="p-4 border-b">
-		                    <h2 class="font-semibold">채팅방 목록</h2>
-		                </div>
-		                <div class="p-4 space-y-2">
-		                    <div class="p-4 rounded-lg bg-blue-100 border-2 border-blue-200 cursor-pointer">
-		                        <div class="flex items-start justify-between mb-2">
-		                            <div>
-		                                <h3 class="font-semibold text-sm">강남역 → 홍대입구</h3>
-		                                <p class="text-xs text-gray-600 mt-1">강남역 2번출구 → 홍대입구역</p>
-		                            </div>
-		                        </div>
-		                        <div class="flex items-center gap-2 mb-2">
-		                            <span class="text-xs bg-blue-500 text-white px-2 py-1 rounded">매칭완료</span>
-		                            <span class="text-xs text-gray-500">2명</span>
-		                            <span class="text-xs text-gray-500">• 25분</span>
-		                        </div>
-		                        <p class="text-xs text-gray-600 truncate">도착했어요! 어디 계신가요?</p>
-		                    </div>
-		                </div>
-		            </div>
+    <!-- SockJS & STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
 
-		            <!-- Chat Interface -->
-		            <div class="lg:col-span-2 backdrop-blur-sm bg-white/80 border rounded-lg shadow-xl flex flex-col">
-		                <div class="p-4 border-b">
-		                    <div class="flex items-center justify-between">
-		                        <div>
-		                            <h2 class="font-semibold text-gray-900">강남역 → 홍대입구</h2>
-		                            <p class="text-sm text-gray-600">강남역 2번출구 → 홍대입구역</p>
-		                        </div>
-		                    </div>
-		                </div>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
 
-		                <!-- Messages -->
-		                <div class="flex-1 p-4 overflow-y-auto">
-		                    <div class="space-y-4">
-		                        <div class="flex justify-center">
-		                            <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-		                                김민수님과 매칭되었습니다!
-		                            </div>
-		                        </div>
-		                        <div class="flex gap-3">
-		                            <div class="w-8 h-8 bg-blue-500 rounded-full"></div>
-		                            <div class="flex flex-col">
-		                                <div class="flex items-center gap-2 mb-1">
-		                                    <span class="text-sm font-medium text-gray-700">김민수</span>
-		                                    <span class="text-xs text-gray-500">07:25</span>
-		                                </div>
-		                                <div class="bg-gray-100 text-gray-900 px-4 py-2 rounded-2xl">
-		                                    <p class="text-sm">안녕하세요! 강남역에서 만날까요?</p>
-		                                </div>
-		                            </div>
-		                        </div>
-		                        <div class="flex gap-3 flex-row-reverse">
-		                            <div class="w-8 h-8 bg-green-500 rounded-full"></div>
-		                            <div class="flex flex-col items-end">
-		                                <div class="flex items-center gap-2 mb-1">
-		                                    <span class="text-xs text-gray-500">07:30</span>
-		                                </div>
-		                                <div class="bg-blue-600 text-white px-4 py-2 rounded-2xl">
-		                                    <p class="text-sm">네 좋습니다! 2번 출구 앞에서 만나요</p>
-		                                </div>
-		                            </div>
-		                        </div>
-		                    </div>
-		                </div>
+    <!-- 배경 장식 -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+    </div>
 
-		                <!-- Message Input -->
-		                <div class="border-t p-4">
-		                    <form id="messageForm" class="flex gap-2">
-		                        <input id="messageInput" type="text" placeholder="메시지를 입력하세요..." 
-		                               class="flex-1 px-3 py-2 border rounded-lg">
-		                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">전송</button>
-		                    </form>
-		                </div>
-		            </div>
-		        </div>
-		    </div>
+    <div class="relative z-10 container mx-auto px-4 py-8">
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">실시간 채팅</h1>
+            <p class="text-gray-600 mt-1">매칭된 택시 메이트들과 소통하세요</p>
+        </div>
 
-		    <!-- JavaScript 추가 및 채팅 기능 구현 -->
-		    <script src="app.js"></script>
-		    <script>
-		        document.addEventListener('DOMContentLoaded', () => {
-		            const messageForm = document.getElementById('messageForm');
-		            const messageInput = document.getElementById('messageInput');
-		            
-		            messageForm.addEventListener('submit', (e) => {
-		                e.preventDefault();
-		                
-		                const message = messageInput.value.trim();
-		                if (!message) return;
-		                
-		                // 메시지 전송 시뮬레이션
-		                TaxiShare.toast.show('메시지가 전송되었습니다.', 'success');
-		                messageInput.value = '';
-		            });
-		        });
-		    </script>
-		</body>
-    </p>
+        <div class="grid lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+
+            <!-- 좌측: 채팅방 목록 -->
+            <div class="backdrop-blur-sm bg-white/80 border rounded-lg shadow-xl">
+                <div class="p-4 border-b">
+                    <h2 class="font-semibold">채팅방 목록</h2>
+                </div>
+                <div class="p-4 space-y-2">
+                    <div class="p-4 rounded-lg bg-blue-100 border-2 border-blue-200 cursor-pointer">
+                        <h3 class="font-semibold text-sm" th:text="${targetUser}">username</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 우측: 채팅창 -->
+            <div class="lg:col-span-2 backdrop-blur-sm bg-white/80 border rounded-lg shadow-xl flex flex-col">
+
+                <!-- 채팅방 헤더 -->
+                <div class="p-4 border-b">
+                    <h2 class="font-semibold text-gray-900" th:text="${targetUser}">username</h2>
+                </div>
+
+                <!-- 메시지 영역 -->
+                <div id="messageArea" class="flex-1 p-4 overflow-y-auto space-y-4">
+
+                    <!-- 처음 안내 메시지 -->
+                    <div class="flex justify-center">
+                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                            상대방과 매칭되었습니다!
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 입력창 -->
+                <div class="border-t p-4">
+                    <form id="messageForm" class="flex gap-2">
+                        <input id="messageInput" type="text" placeholder="메시지를 입력하세요..." 
+                               class="flex-1 px-3 py-2 border rounded-lg">
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg">전송</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 채팅 WebSocket 로직 -->
+	<script th:inline="javascript">
+	    const username = /*[[${username}]]*/ 'Guest';         // 로그인한 사용자
+	    const targetUser = /*[[${targetUsername}]]*/ 'Unknown'; // 상대
+	</script>
+
+	<script>
+	    let stompClient = null;
+
+        function connect() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, () => {
+                console.log("WebSocket 연결됨!");
+
+                stompClient.subscribe('/topic/messages', (message) => {
+                    const msg = JSON.parse(message.body);
+                    showMessage(msg);
+                });
+            });
+        }
+
+        function showMessage(msg) {
+            const area = document.getElementById("messageArea");
+
+            // 오른쪽/왼쪽 정렬 판단
+            const isMine = msg.from === username;
+
+            const bubble = document.createElement("div");
+            bubble.className = `flex gap-3 ${isMine ? "flex-row-reverse" : ""}`;
+
+            bubble.innerHTML = `
+                <div class="w-8 h-8 ${isMine ? "bg-green-500" : "bg-blue-500"} rounded-full"></div>
+                <div class="flex flex-col ${isMine ? "items-end" : ""}">
+                    <div class="bg-${isMine ? "blue-600 text-white" : "gray-100 text-gray-900"} px-4 py-2 rounded-2xl">
+                        <p class="text-sm"><strong>${msg.from}</strong>: ${msg.content}</p>
+                    </div>
+                </div>
+            `;
+
+            area.appendChild(bubble);
+            area.scrollTop = area.scrollHeight;
+        }
+
+        document.getElementById("messageForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            const msg = {
+                sender: username,
+                content: text
+            };
+
+            stompClient.send("/app/chat", {}, JSON.stringify(msg));
+            input.value = "";
+        });
+
+        connect();
+    </script>
+
+</body>
 </th:block>
 </html>
