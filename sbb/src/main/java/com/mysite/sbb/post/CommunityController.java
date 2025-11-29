@@ -139,13 +139,31 @@ public class CommunityController
 	@PostMapping("/community_search")
 	public String coummunity_search(@RequestParam("key") String key, Model model)
 	{
-		List<Post> postList=postService.searchPosts(key);
-		
-		model.addAttribute("postList",postList);
-		model.addAttribute("key",key);
-		
-		return "community";
+	    List<Post> postList = postService.searchPosts(key);
+	    model.addAttribute("postList", postList);
+	    model.addAttribute("key", key);
+
+	    // 댓글 Map
+	    Map<Integer, Integer> commentCount = new HashMap<>();
+	    for (Post p : postList) {
+	        commentCount.put(p.getId(), commentService.getCommentCount(p.getId()));
+	    }
+	    model.addAttribute("commentCount", commentCount);
+
+	    // 추천수 Map
+	    Map<Integer, Integer> recommendCount = new HashMap<>();
+	    for (Post p : postList) {
+	        recommendCount.put(p.getId(), recommendationService.count(p));
+	    }
+	    model.addAttribute("recommendCount", recommendCount);
+
+	    // 유저/게시글 숫자
+	    model.addAttribute("userCount", userService.getUserCount());
+	    model.addAttribute("postCount", postService.getPostCount());
+
+	    return "community";
 	}
+
 	
 	@GetMapping("/community_edit/{id}")
 	public String community_edit(@PathVariable Integer id, Model model) 
